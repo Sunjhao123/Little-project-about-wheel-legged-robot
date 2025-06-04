@@ -1,0 +1,94 @@
+<?xml version="1.0" ?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="laser">
+    <xacro:macro name="LASER" params="connected_to laser_name xyz:='0 0 0' rpy:='0 0 0' ">
+
+      <joint name="${laser_name}_joint" type="fixed">
+        <origin xyz="${xyz}" rpy="${rpy}"/>
+        <parent link="${connected_to}"/>
+        <child link="${laser_name}"/>
+      </joint>
+
+      <link name="${laser_name}">
+      <inertial>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <mass
+          value="0.1" />
+        <inertia
+          ixx="0.01"
+          ixy="0"
+          ixz="0"
+          iyy="0.01"
+          iyz="0"
+          izz="0.01" />
+      </inertial>
+      <visual>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.05" radius="0.05"/>
+        </geometry>
+        <material
+          name="">
+          <color
+            rgba="1 1 1 1" />
+        </material>
+      </visual>
+      <collision>
+        <origin
+          xyz="0 0 0"
+          rpy="0 0 0" />
+        <geometry>
+          <cylinder length="0.05" radius="0.05"/>
+        </geometry>
+      </collision>
+    </link>
+
+    <gazebo reference="${laser_name}">
+        <material>Gazebo/Orange</material>
+    </gazebo>
+    <gazebo reference="${laser_name}_joint">
+        <disableFixedJointLumping>true</disableFixedJointLumping>
+    </gazebo>
+
+    <!-- laser plugin for 'laser_link' -->
+    <gazebo reference="${laser_name}">
+        <sensor type="ray" name="rplidar">
+            <pose>0 0 0 0 0 0</pose>
+            <visualize>true</visualize>
+            <update_rate>300</update_rate>
+            <ray>
+                <scan>
+                  <horizontal>
+                    <samples>720</samples>
+                    <resolution>1</resolution>
+                    <min_angle>-3</min_angle>
+                    <max_angle>3</max_angle>
+                  </horizontal>
+                </scan>
+                <range>
+                  <min>0.10</min>
+                  <max>100.0</max>
+                  <resolution>0.001</resolution>
+                </range>
+                <noise>
+                  <type>gaussian</type>
+                  <mean>0.0</mean>
+                  <stddev>0.01</stddev>
+                </noise>
+            </ray>
+            <plugin name="gazebo_rplidar" filename="libgazebo_ros_laser.so">
+                <topicName>/scan</topicName>
+                <frameName>laser_link</frameName>
+            </plugin>
+        </sensor>
+    </gazebo>
+
+
+
+
+  </xacro:macro>
+
+</robot>

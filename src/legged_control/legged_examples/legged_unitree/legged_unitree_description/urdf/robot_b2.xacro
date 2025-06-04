@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="robot">
+
+    <xacro:arg name="robot_type" default="b2w"/>
+
+    <xacro:arg name="gpu" default="true"/>
+    <xacro:property name="gpu" value="$(arg gpu)" />
+    <xacro:arg name="organize_cloud" default="true"/>
+    <xacro:property name="organize_cloud" value="$(arg organize_cloud)" />
+
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/materials.xacro"/>
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/leg_b2.xacro"/>
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/gazebo.xacro"/>
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/imu.xacro"/>
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/laser.xacro"/>
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/inertial.xacro" />
+    <!-- <xacro:include filename="$(find legged_unitree_description)/urdf/arm/arm_model.xacro"/>-->
+    <!-- <xacro:include filename="$(find legged_unitree_description)/urdf/arm/arm_trans.xacro"/>-->
+
+    <xacro:include filename="$(find legged_unitree_description)/urdf/$(arg robot_type)/const.xacro"/>
+
+<!--    <xacro:property name="mesh_path" value="../meshes"/>-->
+    <!-- <xacro:property name="mesh_path" value="$(find legged_unitree_description)/meshes/$(arg robot_type)"/> -->
+    <xacro:property name="mesh_path" value="package://legged_unitree_description/meshes/b2w"/>
+
+    <link name="base">
+        <visual>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <mesh filename="${mesh_path}/trunk.dae" scale="1 1 1"/>
+            </geometry>
+        </visual>
+        <collision>
+            <origin rpy="0 0 0" xyz="0 0 0"/>
+            <geometry>
+                <box size="${trunk_length} ${trunk_width} ${trunk_height}"/>
+            </geometry>
+        </collision>
+        <inertial>
+            <origin rpy="0 0 0" xyz="${trunk_com_x} ${trunk_com_y} ${trunk_com_z}"/>
+            <mass value="${trunk_mass}"/>
+            <inertia
+                    ixx="${trunk_ixx}" ixy="${trunk_ixy}" ixz="${trunk_ixz}"
+                    iyy="${trunk_iyy}" iyz="${trunk_iyz}"
+                    izz="${trunk_izz}"/>
+        </inertial>
+    </link>
+
+    <xacro:IMU connected_to="base" imu_name="base_imu" xyz="0. 0. 0." rpy="0. 0. 0."/>
+    <xacro:LASER connected_to="base" laser_name="laser_link" xyz="0.3 0. 0.2" rpy="0. 0. 0."/>
+
+    <!-- VLP16 激光雷达 -->
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/laser_support.xacro" />
+
+    <xacro:include filename="$(find legged_unitree_description)/urdf/common1/VLP-16.xacro"/>
+    <xacro:VLP-16 connected_to="support" lidar_name="velodyne" topic="/velodyne_points" organize_cloud="${organize_cloud}" hz="10" samples="440" gpu="${gpu}">
+          <origin xyz="0 0 ${support_length/2}" rpy="0 0 0" />
+    </xacro:VLP-16>
+
+
+    <xacro:leg prefix="LF" mesh_path="${mesh_path}" mirror="1" mirror_dae="True" front_hind="1" front_hind_dae="True">
+        <origin rpy="0.2 0 0" xyz="${leg_offset_x} ${leg_offset_y} 0"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="LH" mesh_path="${mesh_path}" mirror="1" mirror_dae="True" front_hind="-1" front_hind_dae="False">
+        <origin rpy="0.2 0 0" xyz="${-leg_offset_x} ${leg_offset_y} 0"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="RF" mesh_path="${mesh_path}" mirror="-1" mirror_dae="False" front_hind="1" front_hind_dae="True">
+        <origin rpy="-0.2 0 0" xyz="${leg_offset_x} ${-leg_offset_y} 0"/>
+    </xacro:leg>
+
+    <xacro:leg prefix="RH" mesh_path="${mesh_path}" mirror="-1" mirror_dae="False" front_hind="-1" front_hind_dae="False">
+        <origin rpy="-0.2 0 0" xyz="${-leg_offset_x} ${-leg_offset_y} 0"/>
+    </xacro:leg>
+
+</robot>

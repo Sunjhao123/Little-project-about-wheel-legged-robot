@@ -1,0 +1,16 @@
+<launch>
+     <include file="$(find legged_unitree_description)/launch/empty_world_b2_factory.launch">
+    </include>
+
+    <include file="$(find legged_controllers)/launch/load_controller_b2.launch">
+    </include>
+
+    
+
+    <node name="Sub_cmd_vel" pkg="control_demo" type="Sub_cmd_vel.py" output="screen" /> 
+    <include file="$(find control_demo)/launch/publish_cmd_vel_once.launch" />
+
+    
+
+</launch>
+ 

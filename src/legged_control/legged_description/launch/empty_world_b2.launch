@@ -1,0 +1,31 @@
+<launch>
+    <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago, b2, b2w]"/>
+      <arg name="paused" default="false"/>
+
+    <param name="legged_robot_description" command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/robot_b2.xacro
+       robot_type:=$(arg robot_type)
+    "/>
+
+    <param name="robot_description" command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/robot_b2.xacro
+       robot_type:=$(arg robot_type)
+    "/>
+
+
+    <node name="generate_urdf" pkg="legged_common" type="generate_urdf.sh" output="screen"
+          args="$(find legged_unitree_description)/urdf/robot_b2.xacro $(arg robot_type)"/>
+
+    <rosparam file="$(find legged_gazebo)/config/b2.yaml" command="load"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find legged_gazebo)/worlds/test2.world"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="true"/>
+    </include>
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <!--  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
+          args="-z 0.78 -param legged_robot_description -urdf -model $(arg robot_type)" output="screen"/> -->
+    
+   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
+          args="-z 0.78 -param legged_robot_description -urdf -model $(arg robot_type)" output="screen"/>
+   
+
+</launch>

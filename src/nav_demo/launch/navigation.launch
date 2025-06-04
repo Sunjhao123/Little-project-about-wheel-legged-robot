@@ -1,0 +1,64 @@
+
+<launch>
+
+   <!--<node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+      <remap from="scan" to="scan"/>
+      <param name="base_frame" value="base"/>
+      <param name="odom_frame" value="odom"/> 
+      <param name="map_update_interval" value="20.0"/>
+      <param name="maxUrange" value="100.0"/>
+      <param name="sigma" value="0.05"/>
+      <param name="kernelSize" value="1"/>
+      <param name="lstep" value="0.05"/>
+      <param name="astep" value="0.05"/>
+      <param name="iterations" value="5"/>
+      <param name="lsigma" value="0.075"/>
+      <param name="ogain" value="3.0"/>
+      <param name="lskip" value="0"/>
+      <param name="srr" value="0.1"/>
+      <param name="srt" value="0.2"/>
+      <param name="str" value="0.1"/>
+      <param name="stt" value="0.2"/>
+      <param name="linearUpdate" value="1.0"/>
+      <param name="angularUpdate" value="0.5"/>
+      <param name="temporalUpdate" value="3.0"/>
+      <param name="resampleThreshold" value="0.5"/>
+      <param name="particles" value="30"/>
+      <param name="xmin" value="-50.0"/>
+      <param name="ymin" value="-50.0"/>
+      <param name="xmax" value="50.0"/>
+      <param name="ymax" value="50.0"/>
+      <param name="delta" value="0.05"/>
+      <param name="llsamplerange" value="0.01"/>
+      <param name="llsamplestep" value="0.01"/>
+      <param name="lasamplerange" value="0.005"/>
+      <param name="lasamplestep" value="0.005"/>
+    </node>-->
+
+    <include file="$(find control_demo)/launch/start_world_b2.launch">
+      </include>
+
+  <!-- 开启teb_local_planner导航算法-默认使用teb算法-->
+  <include file="$(find nav_demo)/launch/include/teb_local_planner.launch" >
+  <!-- 开启dwa_local_planner导航算法,与teb二者选其一，非全向移动如akm不可使用dwa算法-->
+  <!-- <include file="$(find nav_demo)/launch/include/dwa_local_planner.launch" if="$(arg gazebo_navigation)">  -->
+    <arg name="car_mode" value="zrobo"/>
+  </include>
+
+
+      <!--发布odom话题和tf-->
+
+
+ <!-- 设置需要用于导航的地图  -->
+ <arg name="map_file" default="$(find nav_demo)/map/maplab.yaml"/>
+ <node name="map_server_for_test" pkg="map_server" type="map_server" args="$(arg map_file)" output="screen" >
+ </node>
+ <!-- 开启用于导航的自适应蒙特卡洛定位amcl-->
+ <include file="$(find nav_demo)/launch/include/amcl.launch" />
+
+  <node name="rviz" pkg="rviz" type="rviz"    args="-d $(find nav_demo)/a2.rviz"/>
+</launch>
+
+
+
+

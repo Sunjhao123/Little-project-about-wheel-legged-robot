@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<robot>
+    <!-- ros_control plugin -->
+    <!-- <gazebo>
+        <plugin name="gazebo_ros_control" filename="liblegged_hw_sim.so">
+            <robotNamespace>/</robotNamespace>
+            <robotParam>legged_robot_description</robotParam>
+            <robotSimType>legged_gazebo/LeggedHWSim</robotSimType>
+        </plugin>
+    </gazebo> -->
+
+    <gazebo>
+        <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+            <robotNamespace>/zrobo</robotNamespace>
+            <leftFrontJoint>LF_foot</leftFrontJoint>
+            <rightFrontJoint>RF_foot</rightFrontJoint>
+            <leftRearJoint>LH_foot</leftRearJoint>
+            <rightRearJoint>RH_foot</rightRearJoint>
+            <wheelSeparation>0.4</wheelSeparation>
+            <wheelDiameter>0.225</wheelDiameter>
+            <robotBaseFrame>base</robotBaseFrame>
+            <odometryFrame>odom1</odometryFrame>
+            <odometryTopic>odom1</odometryTopic>
+            <commandTopic>cmd_vel</commandTopic>
+            <torque>60</torque>
+            <updateRate>100</updateRate>
+            <publishWheelTF>true</publishWheelTF>
+            <publishTF>true</publishTF>
+            <publishWheelJointState>false</publishWheelJointState>
+            <alwaysOn>true</alwaysOn>
+            <legacyMode>true</legacyMode>
+            <broadcastTF>false</broadcastTF>
+        </plugin>
+    </gazebo>
+
+    <gazebo>
+        <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+            <alwaysOn>true</alwaysOn>
+            <updateRate>1000.0</updateRate>
+            <bodyName>base</bodyName>
+            <topicName>ground_truth/state</topicName>
+            <gaussianNoise>0</gaussianNoise>
+            <frameName>world</frameName>
+            <xyzOffsets>0 0 0</xyzOffsets>
+            <rpyOffsets>0 0 0</rpyOffsets>
+        </plugin>
+    </gazebo>
+
+    <gazebo reference="base_link">
+        <maxVel>100.</maxVel>
+        <kp>10000.</kp>
+        <kd>0.</kd>
+    </gazebo>
+
+    <gazebo reference="stick_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <material>Gazebo/White</material>
+    </gazebo>
+
+</robot>

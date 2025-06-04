@@ -1,0 +1,37 @@
+controllers:
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 100
+  legged_controller:
+    type: legged/LeggedController
+
+  LF_foot_controller:
+    type: velocity_controllers/JointVelocityController
+    joint:  LF_foot
+    pid: {p: 5000.0, i: 0.01, d: 100.0}
+  RF_foot_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: RF_foot
+    pid: {p: 5000.0, i: 0.01, d: 100.0}
+  LH_foot_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: LH_foot
+    pid: {p: 5000.0, i: 0.01, d: 100.0}
+  RH_foot_controller:
+    type: velocity_controllers/JointVelocityController
+    joint: RH_foot
+    pid: {p: 5000.0, i: 0.01, d: 100.0}
+
+  wheel_velocity_controller:
+       type: velocity_controllers/JointVelocityController
+       joints:
+        - LF_foot
+        - RF_foot
+        - LH_foot
+        - RH_foot
+       pid: {p: 5000.0, i: 0.01, d: 100.0}
+       
+  legged_cheater_controller:
+    type: legged/LeggedCheaterController
+
+  

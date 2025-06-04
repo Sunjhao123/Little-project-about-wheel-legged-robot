@@ -1,0 +1,47 @@
+<launch>
+    <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago, b2, b2w]"/>
+      <arg name="paused" default="false"/>
+
+    <param name="legged_robot_description" command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/robot_arm.xacro
+       robot_type:=$(arg robot_type)
+    "/>
+
+    <param name="robot_description" command="$(find xacro)/xacro $(find legged_unitree_description)/urdf/robot_arm.xacro
+       robot_type:=$(arg robot_type)
+    "/>
+
+    <rosparam file="$(find legged_gazebo)/config/b2_arm.yaml" command="load"/>
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="$(find legged_gazebo)/worlds/test2.world"/>
+        <arg name="paused" value="$(arg paused)"/>
+        <arg name="use_sim_time" value="true"/>
+    </include>
+    <!-- push robot_description to factory and spawn robot in gazebo -->
+    <!--  <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" clear_params="true"
+          args="-z 0.78 -param legged_robot_description -urdf -model $(arg robot_type)" output="screen"/> -->
+    
+   <node name="spawn_urdf" pkg="gazebo_ros" type="spawn_model" 
+          args="-z 0.78 -param legged_robot_description -urdf -model $(arg robot_type)" output="screen"/>
+
+   <!-- make the files into global parameters -->
+    <param name="urdfFile" value="$(find legged_unitree_description)/urdf/b2w_arm.urdf"/>
+    <param name="taskFile" value="$(find legged_controllers)/config/b2w/task.info"/>
+    <param name="referenceFile" value="$(find legged_controllers)/config/b2w/reference.info"/>
+    <param name="gaitCommandFile" value="$(find legged_controllers)/config/b2w/gait.info"/>
+
+   <rosparam file="$(find legged_controllers)/config/controllers.yaml" command="load"/>
+
+    <node name="controller_loader" pkg="controller_manager" type="spawner"
+          output="screen" args="
+          controllers/joint_state_controller
+          controllers/legged_controller
+          controllers/LF_foot_controller
+          controllers/RF_foot_controller
+          controllers/LH_foot_controller
+          controllers/RH_foot_controller
+
+    "/>
+
+   
+
+</launch>

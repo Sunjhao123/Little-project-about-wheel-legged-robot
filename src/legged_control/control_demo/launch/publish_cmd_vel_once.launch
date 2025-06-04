@@ -1,0 +1,7 @@
+<launch>
+    <!-- 启动发布cmd_vel消息的节点 -->
+    <node name="publish_cmd_vel_once" pkg="control_demo" type="start_demo.py" output="screen">
+        <!-- <param name="linear_x" type="double" value="0.0" />
+        <param name="angular_z" type="double" value="0.0" /> -->
+    </node>
+</launch>

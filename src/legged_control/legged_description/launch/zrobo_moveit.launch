@@ -1,0 +1,92 @@
+
+<launch>
+ <arg name="debug" default="false"/>
+  <!-- By default, we do not start a database (it can be large) -->
+  <arg name="db" default="false" />
+  <!-- Allow user to specify database location -->
+  <arg name="db_path" default="$(find zrobo_moveit_config)/default_warehouse_mongo_db" />
+
+  <!-- By default, we won't load or override the robot_description -->
+  <arg name="load_robot_description" default="false"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched test1test2 test3 wheeltec -->
+  <include file="$(find gazebo_factory_world)/launch/factory_world.launch">
+  <!--机器人模型的起点放置位置xyz坐标-->
+  <!--arg name="x_pos" default="0.0"/-->
+  <!--arg name="y_pos" default="0.0"/-->
+  <!--arg name="z_pos" default="0.0"/-->
+  </include>
+
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+  <param name="/use_gui" value="false"/> 
+  <rosparam param="/source_list">[/zrobo/joint_states]</rosparam>
+  </node>
+
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <param name="robot_description"
+  command="$(find xacro)/xacro --inorder '$(find zrobo_description)/urdf/zrobo.xacro'" />
+
+  <!-- node pkg="gazebo_plugins" type="gazebo_ros_laser" name="laser" args="$(arg robot_model)/laser_link laser:=/scan"/-->
+
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model zrobo -param robot_description"/>
+
+  <include file="$(find zrobo_moveit_config)/launch/ros_controllers.launch"/>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <!-- rosparam file="$(find zrobo_control)/config/zrobo_control.yaml" command="load"/ -->
+  <rosparam file="$(find zrobo_control)/config/zrobo_control_moveit.yaml" command="load"/>
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" ns="/zrobo"
+  output="screen" args="joint_state_controller
+                        joint1_position_controller
+                        joint2_position_controller
+                        joint3_position_controller
+                        joint4_position_controller
+                        joint5_position_controller
+                        joint6_position_controller
+                        joint7_position_controller
+                        joint8_position_controller
+                        joint9_position_controller
+                        joint10_position_controller
+                        joint11_position_controller
+                        joint12_position_controller
+                        joint13_position_controller
+                        joint14_position_controller
+                        joint15_position_controller
+                        joint16_position_controller
+                        group_arm_controller
+                        group_gripper_controller"/>
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+    <remap from="/joint_states" to="/zrobo/joint_states" />
+  </node>
+
+  <!-- Run the main MoveIt! executable without trajectory execution (we do not have controllers configured by default) -->
+  <include file="$(find zrobo_moveit_config)/launch/move_group.launch">
+    <arg name="allow_trajectory_execution" value="true"/>
+    <arg name="fake_execution" value="false"/>
+    <arg name="info" value="true"/>
+    <arg name="debug" value="$(arg debug)"/>
+    <arg name="load_robot_description" value="$(arg load_robot_description)"/>
+  </include>
+
+  <!-- Run Rviz and load the default config to see the state of the move_group node -->
+  <include file="$(find zrobo_moveit_config)/launch/moveit_rviz.launch">
+    <arg name="rviz_config" value="$(find zrobo_moveit_config)/launch/moveit.rviz"/>
+    <arg name="debug" value="$(arg debug)"/>
+  </include>
+
+  <!-- If database loading was enabled, start mongodb as well -->
+  <include file="$(find zrobo_moveit_config)/launch/default_warehouse_db.launch" if="$(arg db)">
+    <arg name="moveit_warehouse_database_path" value="$(arg db_path)"/>
+  </include>
+
+
+</launch>
+
+
+
+

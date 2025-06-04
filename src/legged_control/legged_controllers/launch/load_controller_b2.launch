@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+
+<launch>
+    <arg name="robot_type" default="$(env ROBOT_TYPE)" doc="Robot type: [a1, aliengo, go1, laikago, b2w, b2]"/>
+
+    <arg name="cheater" default="false"/>
+
+    <!-- make the files into global parameters -->
+    <param name="urdfFile" value="$(find legged_unitree_description)/urdf/b2w.urdf"/>
+    <param name="taskFile" value="$(find legged_controllers)/config/b2w/task.info"/>
+    <param name="referenceFile" value="$(find legged_controllers)/config/b2w/reference.info"/>
+    <param name="gaitCommandFile" value="$(find legged_controllers)/config/b2w/gait.info"/>
+
+      <!--    controllers/LF_foot_controller
+          controllers/RF_foot_controller
+          controllers/LH_foot_controller
+          controllers/RH_foot_controller
+          controllers/group_arm_controller
+          controllers/group_gripper_controller
+                  controllers/wheel_velocity_controller spawner-->
+    <rosparam file="$(find legged_controllers)/config/controllers.yaml" command="load"/>
+
+    <node name="controller_loader" pkg="controller_manager" type="spawner"
+          output="screen" args="
+          controllers/joint_state_controller
+          controllers/legged_controller
+          controllers/LF_foot_controller
+          controllers/RF_foot_controller
+          controllers/LH_foot_controller
+          controllers/RH_foot_controller
+          
+    "/>
+
+    
+    <!-- convert joint states to TF transforms for rviz, etc -->
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+      <remap from="/joint_states" to="/legged_robot_description/joint_states" />
+    </node>
+
+    <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+         <param name="/use_gui" value="false"/> 
+         <rosparam param="/source_list">[/legged_robot_description/joint_states]</rosparam>
+      </node>
+
+    <node pkg="ocs2_legged_robot_ros" type="legged_robot_gait_command" name="legged_robot_gait_command"
+          output="screen"/>
+
+    <node pkg="legged_controllers" type="legged_target_trajectories_publisher" name="legged_robot_target"
+          output="screen"/>
+    <!-- <node pkg="robot_localization" type="ekf_localization_node" name="ekf_se" clear_params="true">
+        <rosparam command="load" file="$(find robot_localization)/params/ekf_template.yaml" />
+    </node>  -->
+   
+</launch>

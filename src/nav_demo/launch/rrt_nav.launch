@@ -1,0 +1,98 @@
+
+<launch>
+
+  <!-- these are the arguments you can pass this launch file, for example paused:=true --><arg name="paused" default="true"/>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="gui" default="true"/>
+  <arg name="headless" default="false"/>
+  <arg name="debug" default="false"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+  <arg name="world_name" value="$(find zrobo_gazebo)/worlds/room_mini.world"/>
+  <arg name="debug" value="$(arg debug)" />
+  <arg name="gui" value="$(arg gui)" />
+  <arg name="paused" value="$(arg paused)"/>
+  <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+  <arg name="headless" value="$(arg headless)"/>
+
+  <!--机器人模型的起点放置位置xyz坐标-->
+  <!--arg name="x_pos" default="0.0"/-->
+  <!--arg name="y_pos" default="0.0"/-->
+  <!--arg name="z_pos" default="0.0"/-->
+  </include>
+
+
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher">
+  <param name="/use_gui" value="false"/> 
+  <rosparam param="/source_list">[/zrobo/joint_states]</rosparam>
+  </node>
+
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <param name="robot_description"
+  command="$(find xacro)/xacro --inorder '$(find zrobo_description)/urdf/zrobo.xacro'" />
+
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen" args="-urdf -model zrobo -param robot_description"/>
+
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find zrobo_control)/config/zrobo_control.yaml" command="load"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" ns="/zrobo"
+  output="screen" args="joint_state_controller
+                        joint1_position_controller
+                        joint2_position_controller
+                        joint3_position_controller
+                        joint4_position_controller
+                        joint5_position_controller
+                        joint6_position_controller
+                        joint7_position_controller
+                        joint8_position_controller
+                        joint9_position_controller
+                        joint10_position_controller
+                        joint11_position_controller
+                        joint12_position_controller
+                        joint13_position_controller
+                        joint14_position_controller
+                        joint15_position_controller
+                        joint16_position_controller"/>
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+    <remap from="/joint_states" to="/zrobo/joint_states" />
+  </node>
+
+  <!-- 开启teb_local_planner导航算法-默认使用teb算法-->
+  <include file="$(find nav_demo)/launch/include/teb_local_planner.launch" >
+  <!-- 开启dwa_local_planner导航算法,与teb二者选其一，非全向移动如akm不可使用dwa算法-->
+  <!-- <include file="$(find nav_demo)/launch/include/dwa_local_planner.launch" if="$(arg gazebo_navigation)">  -->
+    <arg name="car_mode" value="zrobo"/>
+  </include>
+
+
+      <!--发布odom话题和tf-->
+  <!-- 启动map->odom静态TF发布 -->
+  <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 1 /map /odom 100" />
+
+  <!--启动rrt全局规划器-->
+  <node pkg="rrt_star_global_planner" type="rrt_star_planner" respawn="false" name="rrt_star_planner" output="screen">
+    <rosparam file="$(find rrt_star_global_planner)/params/test_rrt_star_planner.yaml" command="load" />
+  </node>
+ <!-- 启动地图 -->
+  <node pkg="map_server" name="map_server" type="map_server" args="$(find zrobo_gazebo)/maps/map.yaml"/>
+
+ <!-- 开启用于导航的自适应蒙特卡洛定位amcl-->
+ <include file="$(find nav_demo)/launch/include/amcl.launch" />
+ <!-- MarkerArray功能节点 -->
+ <node name='send_mark' pkg="nav_demo" type="send_mark.py">
+ </node>
+  <include file="$(find rf2o_laser_odometry)/launch/laser_odometry.launch" />
+  <!--打开rviz-->
+  <node name="rviz" pkg="rviz" type="rviz"    args="-d $(find zrobo_gazebo)/rviz_config/mini_4wd.rviz"/>
+</launch>
+
+
+
+

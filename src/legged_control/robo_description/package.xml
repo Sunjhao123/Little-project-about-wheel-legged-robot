@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+    <name>robo_description</name>
+    <version>0.0.0</version>
+    <description>Unitree wheeled-legged robot description files</description>
+    <maintainer email="24299129812@qq.com">Sun</maintainer>
+    <license>BSD</license>
+    <author email="24299129812@qq.com">Sun</author>
+
+    <!-- buildtool_depend: dependencies of the build process -->
+    <buildtool_depend>catkin</buildtool_depend>
+    <exec_depend>xacro</exec_depend>
+    <exec_depend>joint_state_publisher</exec_depend>
+    <exec_depend>robot_state_publisher</exec_depend>
+
+</package>
