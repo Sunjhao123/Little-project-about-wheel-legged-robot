@@ -49,3 +49,10 @@ python3 spectrum_visualizer.py
 控制组合运动就在总的启动脚本的控制终端输入 trot，另开一个终端运行rqt，用cmd_vel做控制。
 
 我整的挺乱的，其他的launch文件都是错的，要是能帮我改改也行。本来想在机器人上整个机械臂，看了qm_control的代码没看懂，不大会整，就另整了个单独的工作空间，分成两个系统了。
+
+参考项目：
+https://github.com/skywoodsz/qm_control
+
+https://github.com/skywoodsz/qm_control
+
+https://github.com/danisotelo/qm_door
